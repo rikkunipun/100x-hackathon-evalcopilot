@@ -17,17 +17,20 @@ Respond ONLY with valid JSON, no markdown, no preamble:
 {"pass_fail": true or false, "judge_notes": "one or two sentence specific reason"}`
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 300,
         messages: [{ role: 'user', content: prompt }]
       })
     })
     const data = await response.json()
-    const text = data.content.find(b => b.type === 'text')?.text || '{}'
+    const text = data.choices?.[0]?.message?.content || '{}'
     const clean = text.replace(/```json|```/g, '').trim()
     const parsed = JSON.parse(clean)
     return Response.json(parsed)
